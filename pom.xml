@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.liamcoalstudio</groupId>
+    <artifactId>maialt</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <url>https://www.liamiam.com/maialt</url>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <deployment.name>Liam's Nexus Server</deployment.name>
+        <deployment.repository>liams_server</deployment.repository>
+        <deployment.url>http://www.liamiam.com/repository/maven-releases</deployment.url>
+        <deployment.snapshot.name>Liam's Nexus Server Snapshots</deployment.snapshot.name>
+        <deployment.snapshot.repository>liams_server</deployment.snapshot.repository>
+        <deployment.snapshot.url>http://www.liamiam.com/repository/maven-snapshots</deployment.snapshot.url>
+    </properties>
+
+    <modules>
+        <module>Classes</module>
+        <module>Hooks</module>
+        <module>Common</module>
+        <module>Injector</module>
+        <module>All</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.7.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <name>${deployment.name}</name>
+            <id>${deployment.repository}</id>
+            <url>${deployment.url}</url>
+        </repository>
+        <snapshotRepository>
+            <name>${deployment.snapshot.name}</name>
+            <id>${deployment.snapshot.repository}</id>
+            <url>${deployment.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

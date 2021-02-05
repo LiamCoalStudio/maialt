@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>maialt</artifactId>
+        <groupId>com.liamcoalstudio</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+
+    <artifactId>maialt-all</artifactId>
+    <description>Convenience package - contains no code.</description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.7.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.liamcoalstudio</groupId>
+            <artifactId>maialt-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.liamcoalstudio</groupId>
+            <artifactId>maialt-classes</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.liamcoalstudio</groupId>
+            <artifactId>maialt-hooks</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.liamcoalstudio</groupId>
+            <artifactId>maialt-injector</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <name>${deployment.name}</name>
+            <id>${deployment.repository}</id>
+            <url>${deployment.url}</url>
+        </repository>
+        <snapshotRepository>
+            <name>${deployment.snapshot.name}</name>
+            <id>${deployment.snapshot.repository}</id>
+            <url>${deployment.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>
