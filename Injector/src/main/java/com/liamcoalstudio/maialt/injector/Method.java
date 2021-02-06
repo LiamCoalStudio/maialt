@@ -26,7 +26,7 @@ public @interface Method {
         }
 
         public Bundle(Inject method) {
-            if(method.target().matches(".+;.+\\(.+\\).+")) {
+            if(method.target().matches(".+;.+\\(.*\\).+")) {
                 this.className = method.target().split(";")[0];
                 String a = method.target().split(";", 2)[1];
                 this.methodName = a.substring(0, a.indexOf('('));

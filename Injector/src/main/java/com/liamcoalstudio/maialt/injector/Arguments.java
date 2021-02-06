@@ -3,21 +3,24 @@ package com.liamcoalstudio.maialt.injector;
 import java.util.Arrays;
 
 public class Arguments {
-    private final Object[] objects;
+    private final ArgumentReference[] objects;
 
-    public Arguments(Object... objects) {
+    public Arguments(ArgumentReference... objects) {
         this.objects = objects;
     }
 
-    @SuppressWarnings("unchecked")
-    public<T> T get(int i) {
-        return (T)objects[i];
+    public ArgumentReference get(int i) {
+        return objects[i];
+    }
+
+    public void set(int i, ArgumentReference r) {
+        objects[i] = r;
     }
 
     @Override
     public String toString() {
         return "Arguments{" +
                 "objects=" + Arrays.toString(objects) +
-                '}';
+                "}";
     }
 }

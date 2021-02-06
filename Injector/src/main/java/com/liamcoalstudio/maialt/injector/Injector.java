@@ -75,7 +75,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get());
+                                        annot, i, className.get(), true);
                                 index = i.get();
                                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
                             }
@@ -102,7 +102,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get());
+                                        annot, i, className.get(), true);
                                 index = i.get();
                             }
                         };
@@ -121,7 +121,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get());
+                                        annot, i, className.get(), true);
                                 index = i.get();
                                 super.visitFieldInsn(opcode, owner, name, descriptor);
                             }
@@ -142,7 +142,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get());
+                                        annot, i, className.get(), true);
                                 index = i.get();
                             }
                         };
@@ -160,10 +160,10 @@ public final class Injector {
             MethodVisitor mv, String owner, String name, String descriptor,
             Method.Bundle method, Method.Bundle inject, String methodName,
             String methodDescriptor, Inject annot, AtomicInteger index,
-            String className
+            String className, boolean hasTarget
     ) {
         Method.Bundle b = new Method.Bundle(annot);
-        if(b.matches(owner, name, descriptor) &&
+        if((!hasTarget || b.matches(owner, name, descriptor)) &&
                 method.matches(method.className, methodName, methodDescriptor) &&
                 (index.getAndIncrement() == b.requiredIndex || b.requiredIndex == -1)) {
             Injector.inject(mv, method, inject, className);
@@ -209,18 +209,41 @@ public final class Injector {
         mv.visitTypeInsn(NEW, "com/liamcoalstudio/maialt/injector/Arguments");
         mv.visitInsn(DUP);
         mv.visitInsn(ICONST_0+argc);
-        mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+        mv.visitTypeInsn(ANEWARRAY, "com/liamcoalstudio/maialt/injector/ArgumentReference");
         for (int i = 0; i < argc; i++) {
             mv.visitInsn(DUP);
             mv.visitInsn(ICONST_0+i);
-            mv.visitIntInsn(ALOAD, i+1);
+            mv.visitTypeInsn(NEW, "com/liamcoalstudio/maialt/injector/ArgumentReference");
+            mv.visitInsn(DUP);
+            mv.visitIntInsn(getLoadInstruction(args[i]), i+1);
+            mv.visitMethodInsn(INVOKESPECIAL, "com/liamcoalstudio/maialt/injector/ArgumentReference", "<init>", "(" + getRefDesc(args[i]) + ")V", false);
             mv.visitInsn(AASTORE);
         }
         mv.visitMethodInsn(INVOKESPECIAL,
                 "com/liamcoalstudio/maialt/injector/Arguments",
                 "<init>",
-                "([Ljava/lang/Object;)V",
+                "([Lcom/liamcoalstudio/maialt/injector/ArgumentReference;)V",
                 false);
+    }
+
+    private static int getLoadInstruction(char arg) {
+        switch (arg) {
+            case 'L': return ALOAD;
+            case 'S':
+            case 'I':
+            case 'C':
+            case 'B':
+            case 'Z': return ILOAD;
+            case 'J': return LLOAD;
+            default: return RETURN;
+        }
+    }
+
+    private static String getRefDesc(char arg) {
+        switch (arg) {
+            case 'L': return "Ljava/lang/Object;";
+            default: return "" + arg;
+        }
     }
 
     private static int countArgs(String a) {
