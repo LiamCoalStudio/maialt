@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
  * get every class in a classpath,
  */
 public class ClassSearcher {
-    public static Class<?>[] all(File cp) throws ClassNotFoundException, IOException {
+    public static Class<?>[] all(File cp) throws IOException {
         List<Class<?>> classes = new LinkedList<>();
         ClassLoader ldr = new URLClassLoader(new URL[]{cp.toURI().toURL()});
         if(cp.isDirectory()) {
@@ -39,7 +39,11 @@ public class ClassSearcher {
             while(entries.hasMoreElements()) {
                 ZipEntry e = entries.nextElement();
                 if(!e.getName().endsWith(".class") || e.isDirectory()) continue;
-                classes.add(ldr.loadClass(e.getName().replace('/', '.').substring(0, e.getName().length()-6)));
+                try {
+                    classes.add(ldr.loadClass(e.getName().replace('/', '.').substring(0, e.getName().length()-6)));
+                } catch (ClassNotFoundException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
         return classes.toArray(new Class<?>[0]);
@@ -65,15 +69,15 @@ public class ClassSearcher {
         return stream(Arrays.stream(array), matchers);
     }
 
-    public static @NotNull Stream<Class<?>> stream(File cp) throws IOException, ClassNotFoundException {
+    public static @NotNull Stream<Class<?>> stream(File cp) throws IOException {
         return Arrays.stream(all(cp));
     }
 
-    public static Class<?>[] all(File cp, ClassMatcher... matchers) throws IOException, ClassNotFoundException, ValidationException {
+    public static Class<?>[] all(File cp, ClassMatcher... matchers) throws IOException, ValidationException {
         return stream(cp, matchers).toArray(Class<?>[]::new);
     }
 
-    public static Stream<Class<?>> stream(File cp, ClassMatcher... matchers) throws IOException, ClassNotFoundException, ValidationException {
+    public static Stream<Class<?>> stream(File cp, ClassMatcher... matchers) throws IOException, ValidationException {
         Stream<Class<?>> stream = stream(cp);
         for(ClassMatcher m : matchers) {
             m.validate();
