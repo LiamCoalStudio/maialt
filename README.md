@@ -10,6 +10,24 @@ Maialt comes in four seperate maven packages:
 * `maialt-hooks`: Contains an experimental way of interacting with other threads, might be split off.
 * `maialt-injector`: Uses ASM to create callbacks to methods inside existing methods.
 
+## Using
+1.  Add my repository to your configuration. I might think about putting this on a more common repository later, but this
+    works for now:
+    ```xml
+    <repository>
+        <id>liams_server</id>
+        <url>http://www.liamiam.com/repository/maven-releases/</url>
+    </repository>
+    ```
+2.  Add the `maialt-all` dependency to your configuration. You also could include the individual modules.
+    ```xml
+    <dependency>
+        <groupId>com.liamcoalstudio</groupId>
+        <artifactId>maialt-all</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+    ```
+
 ## The Class Searcher
 The class searcher (`ClassSearcher`) and member searcher (`MemberSearcher`) classes allow you
 to search for classes that match a criteria. It can search inside an array of classes, a
@@ -234,6 +252,6 @@ public class InjectTest {
 ```
 
 ## Hooks
-This section is TODO.
+This section is TODO.  
 Reason: `maialt-hooks` may be split off at any time, and I want to be sure where
 its going before I write docs for it.
