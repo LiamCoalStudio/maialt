@@ -9,9 +9,20 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+/**
+ * Matches class members based on the annotations they have.
+ *
+ * @param <T> Annotation type to search for.
+ */
 public class AnnotationMemberMatcher<T extends Annotation> implements MemberMatcher {
     private final Class<T> a;
 
+    /**
+     * Creates a new Annotation Member Matcher, searching for
+     * the provided annotation type.
+     *
+     * @param a Annotation to search for.
+     */
     public AnnotationMemberMatcher(Class<T> a) {
         this.a = a;
     }
@@ -26,6 +37,13 @@ public class AnnotationMemberMatcher<T extends Annotation> implements MemberMatc
         return method.isAnnotationPresent(a);
     }
 
+    /**
+     * Ensures that {@link #a} is actually an annotation and can be applied
+     * to either fields or methods. (or both)
+     *
+     * @throws ValidationException Thrown if one if these conditions isn't
+     *                             met.
+     */
     @Override
     public void validate() throws ValidationException {
         if(!a.isAnnotation())

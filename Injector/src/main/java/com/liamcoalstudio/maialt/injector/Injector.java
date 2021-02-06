@@ -7,10 +7,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.objectweb.asm.Opcodes.*;
 
+/**
+ * Injects callbacks into classes (in <code>byte[]</code> form)
+ */
 public final class Injector {
     private Injector() {}
 
-    public static byte[] inject(byte[] clazz, InjectLocation loc, Method.Bundle method, Method.Bundle inject, Inject annot) {
+    /**
+     * Injects a single callback into a class.
+     *
+     * @param clazz Class to inject into.
+     * @param loc Point to inject at.
+     * @param method Method to inject into.
+     * @param inject Injector class.
+     * @param annot Annotation for the inject.
+     * @return Modified <code>clazz</code>.
+     */
+    public static byte[] inject(byte[] clazz, InjectLocation loc, Method.Bundle method, Method.Bundle inject,
+                                Inject annot) {
         ClassReader reader = new ClassReader(clazz);
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassVisitor visitor;
@@ -75,7 +89,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get(), true);
+                                        annot, i, className.get());
                                 index = i.get();
                                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
                             }
@@ -102,7 +116,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get(), true);
+                                        annot, i, className.get());
                                 index = i.get();
                             }
                         };
@@ -121,7 +135,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get(), true);
+                                        annot, i, className.get());
                                 index = i.get();
                                 super.visitFieldInsn(opcode, owner, name, descriptor);
                             }
@@ -142,7 +156,7 @@ public final class Injector {
                                 AtomicInteger i = new AtomicInteger(index);
                                 methodInject(this, owner, name, descriptor, method,
                                         inject, methodName, methodDescriptor,
-                                        annot, i, className.get(), true);
+                                        annot, i, className.get());
                                 index = i.get();
                             }
                         };
@@ -156,20 +170,39 @@ public final class Injector {
         return writer.toByteArray();
     }
 
-    private static void methodInject(
-            MethodVisitor mv, String owner, String name, String descriptor,
-            Method.Bundle method, Method.Bundle inject, String methodName,
-            String methodDescriptor, Inject annot, AtomicInteger index,
-            String className, boolean hasTarget
-    ) {
+    /**
+     * Decides whether to generate a callback here.
+     *
+     * @param mv The {@link MethodVisitor}
+     * @param owner Owner of the current method / field.
+     * @param name Name of the current method / field.
+     * @param descriptor Descriptor of the current method / field.
+     * @param method {@link #inject}'s <code>method</code>
+     * @param inject {@link #inject}'s <code>inject</code>
+     * @param methodName Expected name.
+     * @param methodDescriptor Expected descriptor.
+     * @param annot {@link #inject}'s <code>annot</code>
+     * @param index Index value. Used for single injects.
+     * @param className InjectedInto class name.
+     */
+    private static void methodInject(MethodVisitor mv, String owner, String name, String descriptor,
+                                     Method.Bundle method, Method.Bundle inject, String methodName,
+                                     String methodDescriptor, Inject annot, AtomicInteger index, String className) {
         Method.Bundle b = new Method.Bundle(annot);
-        if((!hasTarget || b.matches(owner, name, descriptor)) &&
+        if(b.matches(owner, name, descriptor) &&
                 method.matches(method.className, methodName, methodDescriptor) &&
-                (index.getAndIncrement() == b.requiredIndex || b.requiredIndex == -1)) {
+                (index.getAndIncrement() == b.requiredIndex || b.requiredIndex == -1))
             Injector.inject(mv, method, inject, className);
-        }
     }
 
+    /**
+     * Generates a callback.
+     *
+     * @param mv The {@link MethodVisitor}
+     * @param method {@link #inject}'s <code>method</code>
+     * @param inject {@link #inject}'s <code>inject</code>
+     * @param className InjectedInto class name.
+     */
     private static void inject(MethodVisitor mv, Method.Bundle method, Method.Bundle inject, String className) {
         mv.visitCode();
         if ("()V".equals(inject.descriptor)) {
@@ -183,7 +216,7 @@ public final class Injector {
         } else if (("(L" + className + ";Lcom/liamcoalstudio/maialt/injector/Arguments;)V").equals(inject.descriptor)) {
             mv.visitIntInsn(ALOAD, 0);
             int c = countArgs(method.descriptor);
-            generateArgumentsArg(mv, c, charArgs(method.descriptor, c));
+            generateArgumentsArg(mv, c, charArgs(method.descriptor));
             mv.visitMethodInsn(
                     INVOKESTATIC,
                     inject.className,
@@ -193,7 +226,7 @@ public final class Injector {
             );
         } else if (("(Lcom/liamcoalstudio/maialt/injector/Arguments;)V").equals(inject.descriptor)) {
             int c = countArgs(method.descriptor);
-            generateArgumentsArg(mv, c, charArgs(method.descriptor, c));
+            generateArgumentsArg(mv, c, charArgs(method.descriptor));
             mv.visitMethodInsn(
                     INVOKESTATIC,
                     inject.className,
@@ -205,6 +238,13 @@ public final class Injector {
         mv.visitMaxs(-1, -1);
     }
 
+    /**
+     * Generates an {@link Arguments} argument to a callback.
+     *
+     * @param mv The {@link MethodVisitor}
+     * @param argc Argument count.
+     * @param args Short Argument Descriptors.
+     */
     private static void generateArgumentsArg(MethodVisitor mv, int argc, char[] args) {
         mv.visitTypeInsn(NEW, "com/liamcoalstudio/maialt/injector/Arguments");
         mv.visitInsn(DUP);
@@ -226,19 +266,33 @@ public final class Injector {
                 false);
     }
 
+    /**
+     * Gets the load instruction for a short argument descriptor.
+     *
+     * @param arg Short Argument Descriptor
+     * @return Instruction
+     */
     private static int getLoadInstruction(char arg) {
         switch (arg) {
             case 'L': return ALOAD;
             case 'S':
-            case 'I':
             case 'C':
             case 'B':
-            case 'Z': return ILOAD;
+            case 'F':
+            case 'Z':
+            case 'I': return ILOAD;
+            case 'D':
             case 'J': return LLOAD;
             default: return RETURN;
         }
     }
 
+    /**
+     * Gets a larger descriptor from a short one.
+     *
+     * @param arg The Short Argument Descriptor
+     * @return Larger descriptor
+     */
     private static String getRefDesc(char arg) {
         switch (arg) {
             case 'L': return "Ljava/lang/Object;";
@@ -246,6 +300,12 @@ public final class Injector {
         }
     }
 
+    /**
+     * Counts all arguments in a method descriptor.
+     *
+     * @param a Method descriptor
+     * @return Count
+     */
     private static int countArgs(String a) {
         String args = a.substring(a.indexOf('(')+1, a.indexOf(')'));
         boolean countArgs = true;
@@ -271,7 +331,13 @@ public final class Injector {
         return count;
     }
 
-    private static char[] charArgs(String a, int c) {
+    /**
+     * Converts a normal method descriptor to a Short Argument Descriptor
+     *
+     * @param a Method descriptor
+     * @return S.A.D.
+     */
+    private static char[] charArgs(String a) {
         String args = a.substring(a.indexOf('(')+1, a.indexOf(')'));
         return args.toCharArray();
     }

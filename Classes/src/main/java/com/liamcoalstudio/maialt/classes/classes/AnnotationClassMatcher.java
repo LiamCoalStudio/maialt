@@ -6,9 +6,20 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.*;
 import java.util.Arrays;
 
+/**
+ * Matches annotations on a class.
+ *
+ * @param <T> The class of the annotation being matched.
+ */
 public class AnnotationClassMatcher<T extends Annotation> implements ClassMatcher {
     private final Class<T> a;
 
+    /**
+     * Constructions an {@link AnnotationClassMatcher} that searches for the
+     * annotation passed here.
+     *
+     * @param annotation Annotation to search for. Should not be null.
+     */
     public AnnotationClassMatcher(@NotNull Class<T> annotation) {
         this.a = annotation;
     }
@@ -18,6 +29,13 @@ public class AnnotationClassMatcher<T extends Annotation> implements ClassMatche
         return clazz.isAnnotationPresent(a);
     }
 
+    /**
+     * Validates this matcher.
+     *
+     * @throws ValidationException Thrown if the arguments passed to
+     *   {@link #AnnotationClassMatcher(Class)} are null
+     *   or cannot be applied to types.
+     */
     @Override
     public void validate() throws ValidationException {
         if(!a.isAnnotation())

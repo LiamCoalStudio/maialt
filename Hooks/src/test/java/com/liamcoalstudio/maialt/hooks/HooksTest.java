@@ -1,5 +1,8 @@
 package com.liamcoalstudio.maialt.hooks;
 
+import com.liamcoalstudio.maialt.common.Registry;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,13 +40,18 @@ public class HooksTest {
      */
     private static class TestHook implements Hook {
         @Override
-        public <T> CompletableFuture<T> request(Class<T> c, Object o) {
-            return null;
+        public <T> @NotNull CompletableFuture<T> request(@NotNull Class<T> c, @Nullable Object o) {
+            return CompletableFuture.completedFuture(null);
         }
 
         @Override
-        public <T> CompletableFuture<Void> send(Class<T> c, Object o) {
-            return null;
+        public <T> @NotNull CompletableFuture<Void> send(@NotNull Class<T> c, @Nullable Object o, @Nullable Object v) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public void onRegister(Registry<String, Hook> reg) {
+
         }
     }
 

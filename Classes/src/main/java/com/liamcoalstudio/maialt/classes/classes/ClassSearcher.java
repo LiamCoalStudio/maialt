@@ -15,9 +15,19 @@ import java.util.zip.ZipFile;
 
 /**
  * Searches a classpath for classes that match a given criteria. Can be used to
- * get every class in a classpath,
+ * get every class in a classpath, or find handler classes.
+ *
+ * Used by <code>maialt-injector</code> to find <code>@InjectsInto</code> classes.
  */
 public class ClassSearcher {
+    /**
+     * Gets all classes in a location. Can search in a ZIP file (.jar) or a
+     * directory.
+     *
+     * @param cp The location to search.
+     * @return An array of all classes in <code>cp</code>
+     * @throws IOException Thrown if an IO error occurred.
+     */
     public static Class<?>[] all(File cp) throws IOException {
         List<Class<?>> classes = new LinkedList<>();
         ClassLoader ldr = new URLClassLoader(new URL[]{cp.toURI().toURL()});
@@ -49,10 +59,27 @@ public class ClassSearcher {
         return classes.toArray(new Class<?>[0]);
     }
 
+    /**
+     * Filters classes with {@link ClassMatcher#matches(Class)}.
+     *
+     * @param stream Stream to filter.
+     * @param matchers All matchers to use for filtering.
+     * @return {@link Class}[], converted from return value of
+     *         {@link #stream(Stream, ClassMatcher...)}
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Class<?>[] all(Stream<Class<?>> stream, ClassMatcher... matchers) throws ValidationException {
         return stream(stream, matchers).toArray(Class<?>[]::new);
     }
 
+    /**
+     * Filters classes with {@link ClassMatcher#matches(Class)}.
+     *
+     * @param stream Stream to filter.
+     * @param matchers All matchers to use for filtering.
+     * @return {@link Stream}&lt;{@link Class}&gt; without elements that didn't match
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Stream<Class<?>> stream(Stream<Class<?>> stream, ClassMatcher... matchers) throws ValidationException {
         for(ClassMatcher m : matchers)
             m.validate();
@@ -61,22 +88,66 @@ public class ClassSearcher {
         return stream;
     }
 
+    /**
+     * Filters all {@link Class} objects in an array by an array of matchers.
+     *
+     * @param array Array of {@link Class class}es to check.
+     * @param matchers Matchers to match against.
+     * @return Return value of Uses {@link #stream(Class[], ClassMatcher...)},
+     *         converted to an array.
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Class<?>[] all(Class<?>[] array, ClassMatcher... matchers) throws ValidationException {
         return stream(array, matchers).toArray(Class<?>[]::new);
     }
 
+    /**
+     * Filters an array of classes by {@link ClassMatcher#matches(Class)}.
+     *
+     * @param array Array of classes
+     * @param matchers Matchers to filter against
+     * @return Filtered stream
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Stream<Class<?>> stream(Class<?>[] array, ClassMatcher... matchers) throws ValidationException {
         return stream(Arrays.stream(array), matchers);
     }
 
+    /**
+     * Gets a {@link Stream} of all {@link Class}es in a location.
+     *
+     * @param cp Location to search
+     * @return Filtered stream.
+     * @throws IOException Thrown if an IO error occurred.
+     */
     public static @NotNull Stream<Class<?>> stream(File cp) throws IOException {
         return Arrays.stream(all(cp));
     }
 
+    /**
+     * Gets an array of all classes in a location that match every
+     * matcher in <code>matchers</code>.
+     *
+     * @param cp Location to search.
+     * @param matchers Matchers to filter against.
+     * @return Filtered array
+     * @throws IOException Thrown if an IO error occurred
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Class<?>[] all(File cp, ClassMatcher... matchers) throws IOException, ValidationException {
         return stream(cp, matchers).toArray(Class<?>[]::new);
     }
 
+    /**
+     * Gets a stream of all classes in a location that match every
+     * matcher in <code>matchers</code>.
+     *
+     * @param cp Location to search
+     * @param matchers Matchers to filter against.
+     * @return Filtered stream
+     * @throws IOException Thrown if an IO error occurred
+     * @throws ValidationException Thrown by {@link ClassMatcher#validate()}
+     */
     public static Stream<Class<?>> stream(File cp, ClassMatcher... matchers) throws IOException, ValidationException {
         Stream<Class<?>> stream = stream(cp);
         for(ClassMatcher m : matchers) {

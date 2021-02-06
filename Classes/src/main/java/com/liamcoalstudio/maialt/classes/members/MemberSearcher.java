@@ -1,16 +1,30 @@
 package com.liamcoalstudio.maialt.classes.members;
 
 import com.liamcoalstudio.maialt.classes.ValidationException;
+import com.liamcoalstudio.maialt.classes.classes.ClassSearcher;
 import com.liamcoalstudio.maialt.classes.members.searchers.MemberMatcher;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
+/**
+ * Searches for members inside classes. You can use any
+ * {@link ClassSearcher#stream} to get the classes.
+ */
 public class MemberSearcher {
-    public static Field[] allFields(Stream<Class<?>> classes) {
+    /**
+     * Gets all fields in a stream of classes.
+     *
+     * @param classes Classes to search
+     * @return Array of every field in every class in the input.
+     */
+    public static @NotNull Field[] allFields(@NotNull Stream<Class<?>> classes) {
         AtomicReference<Field[]> output = new AtomicReference<>(new Field[0]);
         classes.map(c -> {
             try {
@@ -33,11 +47,24 @@ public class MemberSearcher {
         return output.get();
     }
 
-    public static Stream<Field> streamFields(Stream<Class<?>> classes) {
+    /**
+     * Gets a stream of all fields returned by {@link #allFields(Stream)}, and
+     * has the same restrictions.
+     *
+     * @param classes Classes to search
+     * @return Stream of every field in every class in the input.
+     */
+    public static @NotNull Stream<Field> streamFields(@NotNull Stream<Class<?>> classes) {
         return Arrays.stream(allFields(classes));
     }
 
-    public static Method[] allMethods(Stream<Class<?>> classes) {
+    /**
+     * Gets all methods in a stream of classes.
+     *
+     * @param classes Classes to search
+     * @return Array of every method in every class in the input.
+     */
+    public static @NotNull Method[] allMethods(@NotNull Stream<Class<?>> classes) {
         AtomicReference<Method[]> output = new AtomicReference<>(new Method[0]);
         classes.map(c -> {
             try {
@@ -60,11 +87,28 @@ public class MemberSearcher {
         return output.get();
     }
 
-    public static Stream<Method> streamMethods(Stream<Class<?>> classes) {
+    /**
+     * Gets a stream of all methods returned by {@link #allMethods(Stream)}, and
+     * has the same restrictions.
+     *
+     * @param classes Classes to search
+     * @return Stream of every method in every class in the input.
+     */
+    public static @NotNull Stream<Method> streamMethods(@NotNull Stream<Class<?>> classes) {
         return Arrays.stream(allMethods(classes));
     }
 
-    public static Stream<Field> streamFields(Stream<Class<?>> classes, MemberMatcher... matchers) throws ValidationException {
+    /**
+     * Gets a stream of all fields that match a criteria, using
+     * {@link MemberMatcher#matches(Field)}. Gets the fields using
+     * {@link #allFields(Stream)}, and comes with the same restrictions.
+     *
+     * @param classes Classes to search
+     * @param matchers Matchers to filter against.
+     * @return All fields that match every matcher.
+     * @throws ValidationException Thrown by {@link MemberMatcher#validate()}
+     */
+    public static @NotNull Stream<Field> streamFields(@NotNull Stream<Class<?>> classes, @NotNull MemberMatcher... matchers) throws ValidationException {
         Stream<Field> s = streamFields(classes);
         for(MemberMatcher m : matchers) {
             m.validate();
@@ -75,7 +119,17 @@ public class MemberSearcher {
         return s;
     }
 
-    public static Stream<Method> streamMethods(Stream<Class<?>> classes, MemberMatcher... matchers) throws ValidationException {
+    /**
+     * Gets a stream of all methods that match a criteria, using
+     * {@link MemberMatcher#matches(Method)}. Gets the fields using
+     * {@link #allMethods(Stream)}, and comes with the same restrictions.
+     *
+     * @param classes Classes to search
+     * @param matchers Matchers to filter against.
+     * @return All methods that match every matcher.
+     * @throws ValidationException Thrown by {@link MemberMatcher#validate()}
+     */
+    public static @NotNull Stream<Method> streamMethods(@NotNull Stream<Class<?>> classes, @NotNull MemberMatcher... matchers) throws ValidationException {
         Stream<Method> s = streamMethods(classes);
         for(MemberMatcher m : matchers) {
             m.validate();
@@ -86,11 +140,31 @@ public class MemberSearcher {
         return s;
     }
 
-    public static Field[] allFields(Stream<Class<?>> classes, MemberMatcher... matchers) throws ValidationException {
+    /**
+     * Gets an array of all fields that match a criteria, using
+     * {@link #streamFields(Stream, MemberMatcher...)} to get the fields,
+     * and {@link Stream#toArray(IntFunction)} to convert it.
+     *
+     * @param classes Classes to search
+     * @param matchers Matchers to filter against.
+     * @return All fields that matcher every matcher.
+     * @throws ValidationException Thrown by {@link MemberMatcher#validate()}
+     */
+    public static @NotNull Field[] allFields(@NotNull Stream<Class<?>> classes, @NotNull MemberMatcher... matchers) throws ValidationException {
         return streamFields(classes, matchers).toArray(Field[]::new);
     }
 
-    public static Method[] allMethods(Stream<Class<?>> classes, MemberMatcher... matchers) throws ValidationException {
+    /**
+     * Gets an array of all methods that match a criteria, using
+     * {@link #streamMethods(Stream, MemberMatcher...)} to get the fields,
+     * and {@link Stream#toArray(IntFunction)} to convert it.
+     *
+     * @param classes Classes to search
+     * @param matchers Matchers to filter against.
+     * @return All methods that matcher every matcher.
+     * @throws ValidationException Thrown by {@link MemberMatcher#validate()}
+     */
+    public static @NotNull Method[] allMethods(@NotNull Stream<Class<?>> classes, @NotNull MemberMatcher... matchers) throws ValidationException {
         return streamMethods(classes, matchers).toArray(Method[]::new);
     }
 }

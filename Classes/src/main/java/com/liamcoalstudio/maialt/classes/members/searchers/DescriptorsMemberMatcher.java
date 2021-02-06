@@ -6,16 +6,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class SignatureMemberMatcher implements MemberMatcher {
+/**
+ * Matches members by their descriptor.
+ */
+public class DescriptorsMemberMatcher implements MemberMatcher {
     private final Class<?> type;
     private final Class<?>[] parameters;
 
-    public SignatureMemberMatcher(@NotNull Class<?> type) {
-        this.type = type;
-        parameters = new Class<?>[0];
-    }
-
-    public SignatureMemberMatcher(@NotNull Class<?> type, @NotNull Class<?>[] parameters) {
+    public DescriptorsMemberMatcher(@NotNull Class<?> type, @NotNull Class<?>... parameters) {
         this.type = type;
         this.parameters = parameters;
     }

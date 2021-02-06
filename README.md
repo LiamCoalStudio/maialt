@@ -55,15 +55,13 @@ public class Main {
         try {
             ClassSearcher.stream(new File("test.jar"), new AnnotationClassMatcher<>(Annotated.class))
                     .forEach(System.out::println); // print all classes found
-        } catch (IOException | ClassNotFoundException | ValidationException e) {
+        } catch (IOException | ValidationException e) {
             // Oh no!
             //
             // IOException is probably thrown if the file isn't found.
             // ValidationException shouldn't be thrown without some hacking
             //   to make AnnotationClassMatcher accept non annotation classes,
             //   and at the moment, that class is the only one to throw this.
-            // ClassNotFoundException shouldn't ever be thrown, and if it is 
-            //   opening an issue on this project would be very helpful.
             e.printStackTrace();
         }
     }

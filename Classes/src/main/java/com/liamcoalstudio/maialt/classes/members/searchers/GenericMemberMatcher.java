@@ -5,6 +5,11 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
+/**
+ * Matches classes using a function. However, you need to use the
+ * {@link #any}, {@link #field}, and {@link #method} methods to
+ * construct this class. Each method has it's own limitations.
+ */
 public class GenericMemberMatcher implements MemberMatcher {
     private final boolean canBeUsedOnFields;
     private final boolean canBeUsedOnMethods;
@@ -16,28 +21,53 @@ public class GenericMemberMatcher implements MemberMatcher {
         this.function = function;
     }
 
+    /**
+     * Constructs a Generic Member Matcher that can match
+     * both fields and methods.
+     *
+     * @param function Function getting passed a {@link Member}, and returning
+     *                 either <code>true</code> or <code>false</code>.
+     * @return New instance.
+     */
     public static GenericMemberMatcher any(Function<Member, Boolean> function) {
         return new GenericMemberMatcher(true, true, function);
     }
 
+    /**
+     * Constructs a Generic Member Matcher that can match
+     * only fields. Attempting to use this matcher on methods
+     * will throw an {@link IllegalStateException}.
+     *
+     * @param function Function getting passed a {@link Field}, and returning
+     *                 either <code>true</code> or <code>false</code>.
+     * @return New instance.
+     */
     public static GenericMemberMatcher field(Function<Field, Boolean> function) {
         return new GenericMemberMatcher(true, false, m -> function.apply((Field) m));
     }
 
+    /**
+     * Constructs a Generic Member Matcher that can match
+     * only methods. Attempting to use this matcher on fields
+     * will throw an {@link IllegalStateException}.
+     *
+     * @param function Function getting passed a {@link Method}, and returning
+     *                 either <code>true</code> or <code>false</code>.
+     * @return New instance.
+     */
     public static GenericMemberMatcher method(Function<Method, Boolean> function) {
         return new GenericMemberMatcher(false, true, m -> function.apply((Method) m));
     }
 
-
     @Override
     public boolean matches(Field field) {
-        if(!canBeUsedOnFields) throw new IllegalStateException("This GenericMemberMatcher cannot be applied to Field");
+        if(!canBeUsedOnFields) throw new IllegalStateException("This GenericMemberMatcher cannot be applied to fields");
         return function.apply(field);
     }
 
     @Override
     public boolean matches(Method method) {
-        if(!canBeUsedOnMethods) throw new IllegalStateException("This GenericMemberMatcher cannot be applied to Method");
+        if(!canBeUsedOnMethods) throw new IllegalStateException("This GenericMemberMatcher cannot be applied to methods");
         return function.apply(method);
     }
 }

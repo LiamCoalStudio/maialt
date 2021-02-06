@@ -4,6 +4,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * A method reference, used in {@link Inject}.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({})
 public @interface Method {
