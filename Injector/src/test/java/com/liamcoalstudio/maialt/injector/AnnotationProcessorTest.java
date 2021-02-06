@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class AnnotationProcessorTest {
     @Test
     public void inject() throws IOException {
-        HijackedClassLoader ldr = new HijackedClassLoader();
+        HijackedClassLoader ldr = new HijackedClassLoader(AnnotationProcessorTest.class.getClassLoader());
         AnnotationProcessor.inject(AnnotationProcessorTest.class, ldr);
     }
 
