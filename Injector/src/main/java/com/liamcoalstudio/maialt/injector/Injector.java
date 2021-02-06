@@ -212,7 +212,7 @@ public final class Injector {
         mv.visitTypeInsn(ANEWARRAY, "com/liamcoalstudio/maialt/injector/ArgumentReference");
         for (int i = 0; i < argc; i++) {
             mv.visitInsn(DUP);
-            mv.visitInsn(ICONST_0+i);
+            mv.visitIntInsn(BIPUSH, i);
             mv.visitTypeInsn(NEW, "com/liamcoalstudio/maialt/injector/ArgumentReference");
             mv.visitInsn(DUP);
             mv.visitIntInsn(getLoadInstruction(args[i]), i+1);
