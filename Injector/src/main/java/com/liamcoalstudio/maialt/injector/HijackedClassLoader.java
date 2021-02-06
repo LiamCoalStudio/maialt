@@ -6,6 +6,7 @@ public class HijackedClassLoader extends ClassLoader {
     }
 
     public HijackedClassLoader() {
+        super(ClassLoader.getSystemClassLoader());
     }
 
     public void define(byte[] bytes) {
